@@ -9,7 +9,7 @@ const Op = models.sequelize.Op
 const ErrorHandler = require('../../middlewares/error').ErrorHandler
 
 const smtpTransport = nodemailer.createTransport({
-    service: 'gmail',
+    service: 'Outlook',
     auth: {
         user: mailConfig.user,
         pass: mailConfig.pass
@@ -346,7 +346,7 @@ const issueResetCode = (req, res) => {
         }
         smtpTransport.sendMail(mailOption, function (err, info) {
             if (err) {
-                console.error('Send Mail error : ', error)
+                console.error('Send Mail error : ', err)
                 throw new Error('MAILFAIL')
             } else {
                 console.log(info)
