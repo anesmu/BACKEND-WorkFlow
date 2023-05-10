@@ -310,8 +310,8 @@ const issueResetCode = (req, res) => {
             username,
             reset_code
         } = user
-        let reset_url = `http://localhost:8080/reset?uid=${uid}&resetCode=${reset_code}&reset=true`
-        let dont_reset_url = `http://localhost:8080/reset?uid=${uid}&resetCode=${reset_code}&reset=false`
+        let reset_url = `http://localhost:4200/reset?uid=${uid}&resetCode=${reset_code}&reset=true`
+        let dont_reset_url = `http://localhost:4200/reset?uid=${uid}&resetCode=${reset_code}&reset=false`
         let mailOption = {
             from: mailConfig.user,
             to: email,
