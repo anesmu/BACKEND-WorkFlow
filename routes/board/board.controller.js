@@ -275,7 +275,7 @@ const addBoard = (req, res) => {
         background
     } = req.body
 
-    const addMemeber = (board) => {
+    const addMember = (board) => {
         let {
             bid,
             user_id
@@ -322,7 +322,7 @@ const addBoard = (req, res) => {
                 }, {
                     transaction: t
                 })
-                .then(addMemeber)
+                .then(addMember)
             }
         }).then(respond)
         .catch(onError)
@@ -446,7 +446,7 @@ const deleteBoard = (req, res) => {
         if(!board) {
             throw new Error("NOTFOUND")
         }else {
-
+            return board
         }
     }
 
@@ -489,7 +489,7 @@ const deleteBoard = (req, res) => {
         .catch(onError)
 }
 
-const getMemeberList = (req, res) => {
+const getMemberList = (req, res) => {
     let t
     const {
         bid
@@ -820,7 +820,7 @@ module.exports = {
     addBoard,
     updateBoard,
     deleteBoard,
-    getMemeberList,
+    getMemberList,
     addMember,
     updateMember,
     deleteMember

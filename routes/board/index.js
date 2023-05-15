@@ -23,7 +23,7 @@ router.put("/:bid", controller.updateBoard)
 router.delete("/:bid", controller.deleteBoard)
 
 /* Get member list of a board */
-router.get("/:bid/member", controller.getMemeberList)
+router.get("/:bid/member", controller.getMemberList)
 
 /* Add a member to a board */
 router.post("/:bid/member", controller.addMember)
