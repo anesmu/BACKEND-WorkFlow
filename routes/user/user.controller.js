@@ -315,7 +315,7 @@ const issueResetCode = (req, res) => {
         let mailOption = {
             from: mailConfig.user,
             to: email,
-            subject: 'Work flow Password Reset',
+            subject: 'Actualización de contraseña en Work flow',
             html: `<div style="font: 15px 'Helvetica Neue',Arial,Helvetica;background-color: #F0F0F0; height: 420px; color: #333;">
             <table style="color: #333;padding: 0;margin: 0;width: 100%;font: 15px 'Helvetica Neue',Arial,Helvetica;">
                 <tbody>
@@ -329,11 +329,11 @@ const issueResetCode = (req, res) => {
                                     </tr>
                                     <tr width="100%">
                                         <td style="background: #fff; padding: 18px; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;">
-                                            <div style="font-weight: bold;font-size: 20px;color: #333;margin: 0;">Hello ${username},</div>
-                                            <p style="font-size: 15px; color: #333;">We heard you need a password reset. Click the link below
-                                                and you'll be redirected to a secure site from which you can set a new password.</p>
-                                            <p style="text-align: center; color: #333; font-size: 15px;"><a href="${reset_url}" target="_blank" style="background-color: #3aa54c;border-radius: 3px;text-decoration: none;color: #fff;line-height: 1.25em;font-size: 16px;font-weight: 700;padding: 10px 18px;margin: 24px auto 24px;display: block;width: 180px;">Reset Password</a></p>
-                                            <p style="color: #939393">If you didn't try to reset your password, <a href="${dont_reset_url}" style="color: #365FC9">click here</a> and we'll forget this ever happened.</p>
+                                            <div style="font-weight: bold;font-size: 20px;color: #333;margin: 0;">Hola ${username},</div>
+                                            <p style="font-size: 15px; color: #333;">Hemos escuchado que necesitas restablecer tu contraseña. Haz clic en el enlace de abajo
+                                                y serás redirigido a un sitio seguro desde el cual puedes establecer una nueva contraseña.</p>
+                                            <p style="text-align: center; color: #333; font-size: 15px;"><a href="${reset_url}" target="_blank" style="background-color: #3aa54c;border-radius: 3px;text-decoration: none;color: #fff;line-height: 1.25em;font-size: 16px;font-weight: 700;padding: 10px 18px;margin: 24px auto 24px;display: block;width: 180px;">Restablecer Contraseña</a></p>
+                                            <p style="color: #939393">Si no intentaste restablecer tu contraseña, <a href="${dont_reset_url}" style="color: #365FC9">haz clic aquí</a> y olvidaremos que esto sucedió.</p>
                                         </td>
                                     </tr>
                                 </tbody>
