@@ -2,89 +2,52 @@ const models = require('../../models')
 const Board = models.db.board
 const List = models.db.list
 const Member = models.db.member
+const Card = models.db.card
 const ErrorHandler = require('../../middlewares/error').ErrorHandler
 const addActivity = require('../../middlewares/activity')
 
 const getCardList = (req, res) => {
-	let t
-    const {lid} = req.params
+	let t;
+    const {lid} = req.params;
 
-    const boardCheck = new Promise((resolve, reject) => {
-        Board.findOne({
-            where: {
-                bid
-            },
-            transaction: t,
-        }).then(board => {
-            resolve(board)
-        })
-    })
-
-    const memberCheck = new Promise((resolve, reject) => {
-        Member.findOne({
-            where: {
-                uid: decoded.uid,
-                bid
-            },
-            transaction: t,
-        }).then(member => {
-            resolve(member)
-        })
-    })
-    
     const checkPromise = (list) => {
-        if(!list) {
-            throw new Error("NOTFOUND")
+        if(!list || list.cards.length == 0) {
+            throw new Error("NOTFOUND");
         } else {
-            return Promise.all([boardCheck, memberCheck]).then(data => {
-                const [board, member] = data
-                if(!board) {
-                    throw new Error("NOTFOUND")
-                } else if(!member) {
-                    throw new Error("FORBIDDEN")
-                } else if(list.cards.length == 0) {
-                    return null
-                } else {
-                    return list
-                }
-            })
+            return list;
         }
-    }
+    };
 
 	const respond = (list) => {
 		if(!list) {
-            res.status(204).send()
+            res.status(204).send();
         } else {
             res.json({
                 result: true,
-                data: list
-            })
+                data: list.cards
+            });
         }
-    }
+    };
 
     const onError = (error) => {
-        console.error(error)
-        res.status(400).json(ErrorHandler(error.message))
-    }
+        console.error(error);
+        res.status(400).json(ErrorHandler(error.message));
+    };
 
 	models.sequelize.transaction(transaction => {
-		t = transaction
+		t = transaction;
 		return List.findOne({
-			where: {
-				lid
-            },
+			where: {lid},
             attributes: [],
 			include: [{
 				model: Card, 
-				order: [
-                	['position']
-				],
+				order: ['position'],
 			}],
 			transaction: t
-		}).then(checkPromise)
+		}).then(checkPromise);
 	}).then(respond)
 	.catch(onError)
-}
+};
 
 const addList = (req, res) => {
 	let t

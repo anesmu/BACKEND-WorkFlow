@@ -11,13 +11,14 @@ const getBoardList = (req, res) => {
     let t
     const decoded = req.decoded
 
-    const respond = (board) => {
-        if (board.length == 0) {
+    const respond = (boardList) => {
+        const boards = boardList.map(item => item.board);
+        if (boards.length == 0) {
             res.status(204).send()
         } else {
             res.json({
                 result: true,
-                data: board
+                data: boards
             })
         }
     }
