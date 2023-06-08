@@ -5,7 +5,8 @@ const salt = require('../../config/auth.config').salt
 const nodemailer = require('nodemailer')
 const mailConfig = require('../../config/mail.config')
 const uuidv4 = require('uuid/v4')
-const Op = models.sequelize.Op
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op;
 const ErrorHandler = require('../../middlewares/error').ErrorHandler
 
 const smtpTransport = nodemailer.createTransport({
