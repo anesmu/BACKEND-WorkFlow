@@ -472,7 +472,6 @@ const moveCard = async (req, res) => {
         });
 
         if (card.lid !== lid) {
-            // Remove card from original list
             const cardsInOldList = await Card.findAll({
                 where: { lid: card.lid },
                 order: [['position', 'ASC']],
@@ -482,22 +481,18 @@ const moveCard = async (req, res) => {
             let oldPositions = cardsInOldList.filter(c => c.cid !== card.cid).map((c, i) => ({ cid: c.cid, position: i }));
             await Promise.all(oldPositions.map(pos => Card.update({ position: pos.position }, { where: { cid: pos.cid }, transaction: t })));
             
-            // Add card to the new list
             let newPositions = cardsInTargetList.map((c, i) => {
                 return { cid: c.cid, position: i >= position ? i + 1 : i };
             });
             await Promise.all(newPositions.map(pos => Card.update({ position: pos.position, lid }, { where: { cid: pos.cid }, transaction: t })));
 
-            // Update the moving card's position
             await Card.update({ position: position, lid }, { where: { cid: card.cid }, transaction: t });
         } else {
-            // Moving within the same list
-            let newPositions = [...cardsInTargetList]; // Copy array
+            let newPositions = [...cardsInTargetList]; 
 
-            newPositions.splice(card.position, 1); // Remove card from old position
-            newPositions.splice(position, 0, card); // Insert card at new position
+            newPositions.splice(card.position, 1);
+            newPositions.splice(position, 0, card); 
 
-            // Update all card positions according to their index
             for (let i = 0; i < newPositions.length; i++) {
                 await Card.update({ position: i, lid }, { where: { cid: newPositions[i].cid }, transaction: t });
             }
