@@ -8,6 +8,8 @@ const Comment = models.db.comment
 const Activity = models.db.activity
 const ErrorHandler = require('../../middlewares/error').ErrorHandler
 const getActivity = require('../../middlewares/activity')
+const sequelize = require('sequelize')
+const Op = sequelize.Op;
 
 const getCardDetail = (req, res) => {
     let t
@@ -217,13 +219,13 @@ const getCommentByCard = (req, res) => {
 const addCard = (req, res) => {
     let t
     const decoded = req.decoded
-    const {title, lid, description, position} = req.body
+    const {title, lid, description} = req.body
     let list_title, bid = ""
 
     const listCheck = (list) => {
         if(!list) {
             throw new Error("NOTFOUND")
-        }else {
+        } else {
             list_title = list.title
             bid = list.board.bid
             return Member.findOne({
@@ -236,33 +238,46 @@ const addCard = (req, res) => {
         }
     }
 
+    const getMaxPosition = () => {
+        return Card.max('position', {
+            where: {
+                lid
+            },
+            transaction: t
+        });
+    }
+
     const memberCheck = (member) => {
         if(!member) {
             throw new Error("FORBIDDEN")
         } else {
-            return Card.create({
-                title,
-                lid,
-                description,
-                position
-            },{
-                transaction: t
+            return getMaxPosition().then(maxPosition => {
+                let position = (maxPosition === null) ? 0 : maxPosition + 1;
+
+                return Card.create({
+                    title,
+                    lid,
+                    description,
+                    position
+                },{
+                    transaction: t
+                })
             })
         }
     }
 
     const respond = (card) => {
-        const {cid} = card.dataValues
-		res.json({
-			result: true,
-			message: "Successfully added a card.",
-			data: {
-				cid,
-				lid,
+        const {cid, position} = card.dataValues
+        res.json({
+            result: true,
+            message: "Successfully added a card.",
+            data: {
+                cid,
+                lid,
                 title,
                 description,
-				position
-			}
+                position
+            }
         })
         return {
             type: "add",
@@ -279,19 +294,18 @@ const addCard = (req, res) => {
 
     models.sequelize.transaction(transaction => {
         t = transaction
-        if (title === undefined || title === null || 
-            position === undefined || position === null) {
-			throw new Error("BADREQ")
-		} else {
-			return List.findOne({
-				transaction: t,
-				where: {
-					lid
+        if (title === undefined || title === null) {
+            throw new Error("BADREQ")
+        } else {
+            return List.findOne({
+                transaction: t,
+                where: {
+                    lid
                 },
                 include: [{model: Board}]
-			}).then(listCheck)
-			.then(memberCheck)
-		}
+            }).then(listCheck)
+            .then(memberCheck)
+        }
     }).then(respond)
     .then(getActivity)
     .catch(onError)
