@@ -435,90 +435,83 @@ const deleteCard = (req, res) => {
     .catch(onError)
 }
 
-const moveCard = (req, res) => {
-    let t
-    const decoded = req.decoded
-    const {cid} = req.params
-    const {lid, position} = req.body
-    let card_title, before_list, after_list = ""
+const moveCard = async (req, res) => {
+    const { cid } = req.params;
+    const { lid, position } = req.body;
+    const decoded = req.decoded;
 
-    const memberCheck = (card) => {
-        if(!card) {
-            throw new Error("NOTFOUND")
-        } else {
-            card_title = card.title
-            before_list = card.list.title
-            return Member.findOne({
-                where: {
-                    uid: decoded.uid,
-                    bid: card.list.bid
-                },
-                transaction: t
-            })
-        }
-    }
+    try {
+        const t = await models.sequelize.transaction();
 
-    const update = (member) => {
-        if(!member) {
-            throw new Error("FORBIDDEN")
-        } else {
-            return Card.update({
-                lid,
-                position 
-            },{
-                where: {
-                    cid
-                },
-                transaction: t
-            })
-        }
-    }
-
-    const getListInfo = () => {
-        return List.findOne({
-            where: {
-                lid,
-            },
+        const card = await Card.findOne({
+            where: { cid },
+            include: [{ model: List }],
             transaction: t
-        })
-    }
+        });
 
-    const respond = (list) => {
-        after_list = list.title
-        res.json({
-            result: true,
-            message: "Successfully updated the card"
-        })
-        return {
-            type: "edit",
-            bid: list.bid,
-            uid: decoded.uid,
-            message: `<span class="username">${decoded.username}</span> moved ${card_title} from ${before_list} to ${after_list}`
-        }
-    }
+        if (!card) throw new Error('NOTFOUND');
 
-    const onError = (error) => {
-        console.error(error)
-        res.status(400).json(ErrorHandler(error.message))
-    }
-
-    models.sequelize.transaction(transaction => {
-        t = transaction
-        return Card.findOne({
-            where: {
-                cid
-            },
-            include: [{
-                model: List
-            }],
+        const member = await Member.findOne({
+            where: { uid: decoded.uid, bid: card.list.bid },
             transaction: t
-        }).then(memberCheck)
-        .then(update)
-        .then(getListInfo)
-    }).then(respond)
-    .then(getActivity)
-    .catch(onError)
-}
+        });
+
+        if (!member) throw new Error('FORBIDDEN');
+
+        const targetList = await List.findOne({
+            where: { lid },
+            transaction: t
+        });
+
+        if (!targetList) throw new Error('NOTFOUND');
+
+        const cardsInTargetList = await Card.findAll({
+            where: { lid },
+            order: [['position', 'ASC']],
+            transaction: t
+        });
+
+        if (card.lid !== lid) {
+            // Remove card from original list
+            const cardsInOldList = await Card.findAll({
+                where: { lid: card.lid },
+                order: [['position', 'ASC']],
+                transaction: t
+            });
+
+            let oldPositions = cardsInOldList.filter(c => c.cid !== card.cid).map((c, i) => ({ cid: c.cid, position: i }));
+            await Promise.all(oldPositions.map(pos => Card.update({ position: pos.position }, { where: { cid: pos.cid }, transaction: t })));
+            
+            // Add card to the new list
+            let newPositions = cardsInTargetList.map((c, i) => {
+                return { cid: c.cid, position: i >= position ? i + 1 : i };
+            });
+            await Promise.all(newPositions.map(pos => Card.update({ position: pos.position, lid }, { where: { cid: pos.cid }, transaction: t })));
+
+            // Update the moving card's position
+            await Card.update({ position: position, lid }, { where: { cid: card.cid }, transaction: t });
+        } else {
+            // Moving within the same list
+            let newPositions = [...cardsInTargetList]; // Copy array
+
+            newPositions.splice(card.position, 1); // Remove card from old position
+            newPositions.splice(position, 0, card); // Insert card at new position
+
+            // Update all card positions according to their index
+            for (let i = 0; i < newPositions.length; i++) {
+                await Card.update({ position: i, lid }, { where: { cid: newPositions[i].cid }, transaction: t });
+            }
+        }
+
+        await t.commit();
+
+        res.json({ result: true, message: "Successfully moved the card." });
+    } catch (error) {
+        if (t) await t.rollback();
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+};
 
 module.exports = {
     getCardDetail,
