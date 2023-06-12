@@ -4,8 +4,8 @@ const bodyParser = require('body-parser')
 const logger = require('morgan')
 const cors = require('cors')
 const routes = require('./routes')
-
 const app = express()
+app.use('/images', express.static('images'));
 
 app.use(cors())
 app.use(logger('dev'))

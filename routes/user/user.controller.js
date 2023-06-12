@@ -312,40 +312,32 @@ const issueResetCode = (req, res) => {
             username,
             reset_code
         } = user
-        let reset_url = `http://localhost:4200/reset?uid=${uid}&resetCode=${reset_code}&reset=true`
-        let dont_reset_url = `http://localhost:4200/reset?uid=${uid}&resetCode=${reset_code}&reset=false`
+        let reset_url = `http://localhost:4200/recovery?uid=${uid}&resetCode=${reset_code}&reset=true`
+        let dont_reset_url = `http://localhost:4200/recovery?uid=${uid}&resetCode=${reset_code}&reset=false`
         let mailOption = {
             from: mailConfig.user,
             to: email,
             subject: 'Actualización de contraseña en Work flow',
-            html: `<div style="font: 15px 'Helvetica Neue',Arial,Helvetica;background-color: #F0F0F0; height: 420px; color: #333;">
-            <table style="color: #333;padding: 0;margin: 0;width: 100%;font: 15px 'Helvetica Neue',Arial,Helvetica;">
-                <tbody>
-                    <tr width="100%">
-                        <td>
-                            <table style="border: none;padding: 0px 18px;margin: 50px auto;width: 500px;">
-                                <tbody>
-                                    <tr width="100%" height="57">
-                                        <td style="background-color: #a4b5bf; border-top-left-radius: 4px;border-top-right-radius: 4px;text-align: center;padding: 12px 18px;"><img
-                                                width="120px" src="./images/WM-icon.png" alt=""></td>
-                                    </tr>
-                                    <tr width="100%">
-                                        <td style="background: #fff; padding: 18px; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;">
-                                            <div style="font-weight: bold;font-size: 20px;color: #333;margin: 0;">Hola ${username},</div>
-                                            <p style="font-size: 15px; color: #333;">Hemos escuchado que necesitas restablecer tu contraseña. Haz clic en el enlace de abajo
-                                                y serás redirigido a un sitio seguro desde el cual puedes establecer una nueva contraseña.</p>
-                                            <p style="text-align: center; color: #333; font-size: 15px;"><a href="${reset_url}" target="_blank" style="background-color: #3aa54c;border-radius: 3px;text-decoration: none;color: #fff;line-height: 1.25em;font-size: 16px;font-weight: 700;padding: 10px 18px;margin: 24px auto 24px;display: block;width: 180px;">Restablecer Contraseña</a></p>
-                                            <p style="color: #939393">Si no intentaste restablecer tu contraseña, <a href="${dont_reset_url}" style="color: #365FC9">haz clic aquí</a> y olvidaremos que esto sucedió.</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>`
+            html: `
+            <div style="padding: 20px; font-family: Arial, sans-serif;">
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <div style="background-color: #8f32b3; border-radius: 10px; padding: 20px; color: white; text-align: center;">
+                        <h1 style="font-size: 24px; margin: 0;">Actualización de contraseña</h1>
+                    </div>
+                    <div style="border: 2px solid #8f32b3; border-radius: 10px; padding: 20px; margin-top: 20px; color: #333;">
+                        <p>Hola ${username},</p>
+                        <p>Hemos escuchado que necesitas restablecer tu contraseña. Haz clic en el enlace de abajo y serás redirigido a un sitio seguro desde el cual puedes establecer una nueva contraseña.</p>
+                        <div style="text-align: center;">
+                            <a href="${reset_url}" style="background-color: #8f32b3; color: #fff; border-radius: 10px; text-decoration: none; padding: 15px; margin: 20px auto; display: inline-block;">Restablecer Contraseña</a>
+                        </div>
+                        <p style="font-size: 14px; color: #939393">Si no intentaste restablecer tu contraseña, <a href="${dont_reset_url}" style="color: #365FC9">haz clic aquí</a> y olvidaremos que esto sucedió.</p>
+                    </div>
+                </div>
+            </div>`
         }
+        
+        
+        
         smtpTransport.sendMail(mailOption, function (err, info) {
             if (err) {
                 console.error('Send Mail error : ', err)
@@ -412,7 +404,7 @@ const updatePassword = (req, res) => {
                     reset_code_expiredate: null
                 }, {
                     where: {
-                        username: user.username
+                        uid: user.uid
                     },
                     transaction: t
                 })
