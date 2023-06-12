@@ -159,6 +159,7 @@ const updateInfo = (req, res) => {
     const {
         email
     } = req.body
+    const decoded = req.decoded;
 
     const respond = () => {
         res.json({
@@ -172,14 +173,14 @@ const updateInfo = (req, res) => {
         res.status(400).json(ErrorHandler(error.message))
     }
 
-    model.sequelize.transaction(transaction => {
+    models.sequelize.transaction(transaction => {
         t = transaction
         return User.update({
             email
         }, {
             transaction: t,
             where: {
-                uid: user.uid
+                uid: decoded.uid
             }
         })
     }).then(respond)
