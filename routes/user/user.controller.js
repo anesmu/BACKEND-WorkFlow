@@ -8,7 +8,7 @@ const uuidv4 = require('uuid/v4')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const ErrorHandler = require('../../middlewares/error').ErrorHandler
-var Md5 = require('ts-md5').Md5;
+import { Md5 } from 'ts-md5/dist/md5';
 
 const smtpTransport = nodemailer.createTransport({
     service: 'Outlook',
@@ -26,7 +26,7 @@ const join = (req, res) => {
         password,
         email
     } = req.body
-    password = Md5.hashStr(password); 
+    password = Md5.hashStr(password);
 
     const create = (user) => {
         if (user) {
