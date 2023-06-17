@@ -8,6 +8,7 @@ const uuidv4 = require('uuid/v4')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op;
 const ErrorHandler = require('../../middlewares/error').ErrorHandler
+import { Md5 } from 'ts-md5/dist/md5';
 
 const smtpTransport = nodemailer.createTransport({
     service: 'Outlook',
@@ -25,6 +26,8 @@ const join = (req, res) => {
         password,
         email
     } = req.body
+    password = Md5.hashStr(password);
+
     const create = (user) => {
         if (user) {
             throw new Error('EXIST')
@@ -73,7 +76,8 @@ const login = (req, res) => {
         email,
         password
     } = req.body
-    console.log(req.body)
+    password = Md5.hashStr(password);
+
     const check = (user) => {
         if (!user) {
             throw new Error('NOAUTH')
@@ -382,6 +386,8 @@ const updatePassword = (req, res) => {
     const {
         password
     } = req.body
+    password = Md5.hashStr(password);
+
     const {
         uid,
         resetCode
